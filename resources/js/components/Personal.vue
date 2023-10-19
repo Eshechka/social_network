@@ -81,6 +81,19 @@ export default {
                     this.image = res.data.data;
                 });
         },
+        store() {
+            const id = this.image?.id ? this.image.id : null;
+            axios.post('/api/post', {
+                'title': this.title,
+                'content': this.content,
+                'image_id': id,
+            })
+                .then(res => {
+                    this.title = '';
+                    this.content = '';
+                    this.image = null;
+                });
+        },
     },
 }
 </script>
