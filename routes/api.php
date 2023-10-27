@@ -20,5 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/getauth', \App\Http\Controllers\GetController::class);
     Route::post('/post', [\App\Http\Controllers\PostController::class, 'store']);
+    Route::get('/posts', [\App\Http\Controllers\PostController::class, 'index']);
     Route::post('/post_image', [\App\Http\Controllers\PostImageController::class, 'store']);
+    Route::get('/users', [\App\Http\Controllers\UserController::class, 'index']);
 });

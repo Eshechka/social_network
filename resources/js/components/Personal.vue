@@ -34,37 +34,48 @@
             </div>
         </div>
 
-<!--        <div v-if="posts">-->
-<!--            <h1 class="mb-8 pb-8 border-b border-gray-400">Posts</h1>-->
-<!--            <Post v-for="post in posts" :post="post"></Post>-->
-<!--        </div>-->
+        <div v-if="posts">
+            <h1 class="mb-8 pb-8 border-b border-gray-400">Posts</h1>
+<!--            <div v-for="post in posts">-->
+<!--                <div>{{post.title}}</div>-->
+<!--            </div>-->
+            <Post v-for="post in posts" :post="post"></Post>
+        </div>
 
     </div>
 </template>
 
 <script>
 import axios from "axios";
+import Post from "./Post.vue";
 
 export default {
     name: "Personal",
-
+    components: {Post},
     data() {
         return {
             title: '',
             content: '',
             fileInput: '',
             image: '',
+            posts: [],
         }
     },
 
     mounted() {
         this.getAuth();
+        this.getPosts();
     },
 
     methods: {
         getAuth() {
             axios.get('/api/personal').then(response => {
                 console.log('response = ', response)
+            });
+        },
+        getPosts() {
+            axios.get('/api/posts').then(response => {
+                this.posts = response.data.data;
             });
         },
         selectFile() {
@@ -92,6 +103,7 @@ export default {
                     this.title = '';
                     this.content = '';
                     this.image = null;
+                    this.posts.unshift({...res.data.data});
                 });
         },
     },
