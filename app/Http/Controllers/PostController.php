@@ -7,10 +7,18 @@ use App\Http\Resources\Post\PostResource;
 use App\Models\Post;
 use App\Models\PostImage;
 use Illuminate\Support\Facades\DB;
-use mysql_xdevapi\Exception;
+
 
 class PostController extends Controller
 {
+    protected function index()
+    {
+        $posts = Post::latest()->get();
+
+        return PostResource::collection($posts);
+    }
+
+
     protected function store(StoreRequest $request)
     {
         $data = $request->validated();
@@ -36,7 +44,7 @@ class PostController extends Controller
                 PostImage::clearStorage();
 
             DB::commit();
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             DB::rollBack();
             return response()->json([
                 'error' => $exception->getMessage(),
