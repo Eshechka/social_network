@@ -1,7 +1,10 @@
 <template>
     <div class="mb-8 pb-8 border-b border-gray-400">
         <h1 class="text-xl">{{ post.title }}</h1>
-<!--        <router-link class="text-sm text-gray-800" :to="{name: 'user.show', params: {id: post.user.id}} ">{{ post.user.name }}</router-link>-->
+        <router-link class="text-sm text-gray-800"
+                     :to="{ name: 'user', params: {id: post.user.id} }">
+            {{ post.user.name }}
+        </router-link>
         <img class="my-3 mx-auto" v-if="post.image_url" :src="post.image_url" :alt="post.title"/>
         <p>{{ post.content }}</p>
 
