@@ -10,7 +10,11 @@ class Post extends Model
     use HasFactory;
     protected $guarded = false;
 
-    protected $with = ['image'];
+    protected $with = ['image', 'user'];
+
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 
     public function image() {
         return $this->hasOne(PostImage::class, 'post_id', 'id')
