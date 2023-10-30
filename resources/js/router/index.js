@@ -13,10 +13,12 @@ const router = createRouter({
             component: () => import('../components/Register.vue')
         },
         {
+            name: 'personal',
             path: '/personal',
             component: () => import('../components/Personal.vue')
         },
         {
+            name: 'users',
             path: '/users',
             component: () => import('../components/Users.vue')
         },
@@ -24,6 +26,11 @@ const router = createRouter({
             name: 'user',
             path: '/user/:id',
             component: () => import('../components/User.vue')
+        },
+        {
+            name: 'feed',
+            path: '/users/following_posts',
+            component: () => import('../components/FollowingPosts.vue')
         },
     ]
 })
