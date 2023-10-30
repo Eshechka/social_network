@@ -39,7 +39,6 @@ export default {
         getUserPosts() {
             axios.get(`/api/users/${this.$route.params.id}/posts`)
                 .then(r => {
-                    console.log('r.data.data', r.data.data)
                     this.userPosts = r.data.data;
                 })
         },
