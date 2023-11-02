@@ -3,7 +3,7 @@
         <div class="flex justify-between w-96 mx-auto pb-2">
             <router-link class="mx-0" v-if="!token" to="login">Login</router-link>
             <router-link class="mx-2" v-if="!token" to="register">Register</router-link>
-            <router-link class="mx-2" v-if="token" :to="{ name: 'users' }">Feed</router-link>
+            <router-link class="mx-2" v-if="token" :to="{ name: 'feed' }">Feed</router-link>
             <router-link class="mx-2" v-if="token" :to="{ name: 'users' }">Users</router-link>
             <router-link class="mx-2" v-if="token" :to="{ name: 'personal' }">Personal</router-link>
             <a v-if="token" @click.prevent="logout" href="#">Logout</a>

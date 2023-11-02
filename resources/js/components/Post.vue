@@ -20,16 +20,19 @@
         <div class="flex justify-between mt-2 items-center">
             <div class="flex">
 
-<!--                <div class="flex">
+                <div class="flex">
                     <svg @click.prevent="toggleLike(post)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                          stroke-width="1.5"
                          stroke="currentColor"
-                         :class="['mr-2 stroke-sky-500 cursor-pointer hover:fill-sky-500 w-6 h-6', post.is_liked ? 'fill-sky-500' : 'fill-white']">
+                         :class="[
+                                'mr-2 stroke-sky-500 cursor-pointer hover:fill-sky-500 w-6 h-6',
+                                post.is_liked ? 'fill-sky-500' : 'fill-white']"
+                    >
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
                     </svg>
                     <p>{{ post.likes_count }}</p>
-                </div>-->
+                </div>
 <!--                <div class="flex">
                     <svg @click.prevent="openRepost()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                          stroke-width="1.5" stroke="currentColor"
@@ -47,7 +50,7 @@
 
 
 <!--            v-if="is_repost" -->
-        <div
+<!--        <div
             class="mt-4">
             <div>
                 <input v-model="title" class="w-96 mb-3 rounded-3xl border p-2 border-slate-300" type="text"
@@ -57,11 +60,11 @@
               <textarea v-model="content" class="w-96 mb-3 rounded-3xl border p-2 border-slate-300"
                         placeholder="content"></textarea>
             </div>
-<!--            <div>
+            <div>
                 <a @click.prevent="repost(post)" href="#" class="block p-2 w-32 text-center rounded-3xl bg-green-600 text-white
                 hover:bg-white hover:border hover:border-green-600 hover:text-green-600 box-border ml-auto">Publish</a>
-            </div>-->
-        </div>
+            </div>
+        </div>-->
 
 <!--        <div v-if="post.comments_count > 0" class="mt-4">
 
@@ -99,6 +102,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
     name: "Post",
 
@@ -120,7 +125,16 @@ export default {
     },
 
     methods: {
-    }
+        toggleLike(post) {
+            axios.post(`/api/posts/${post.id}/toggle_like`)
+                .then(r => {
+                    const isLiked = r.data.is_liked;
+                    post.is_liked = isLiked;
+                    post.likes_count =  isLiked ? +post.likes_count+1 : +post.likes_count-1;
+                    this.$emit('click-like', post.id);
+                })
+        },
+    },
 
 }
 </script>
