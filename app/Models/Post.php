@@ -10,7 +10,7 @@ class Post extends Model
     use HasFactory;
     protected $guarded = false;
 
-    protected $with = ['image', 'user'];
+    protected $with = ['image', 'user', 'likes'];
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
@@ -23,5 +23,9 @@ class Post extends Model
 
     public function getDateAttribute() {
         return $this->created_at->diffForHumans();
+    }
+
+    public function likes() {
+        return $this->belongsToMany(User::class, 'liked_posts', 'post_id', 'user_id');
     }
 }

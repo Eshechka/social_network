@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Post\StoreRequest;
 use App\Http\Resources\Post\PostResource;
+use App\Models\LikedPost;
 use App\Models\Post;
 use App\Models\PostImage;
 use Illuminate\Support\Facades\DB;
@@ -11,15 +12,21 @@ use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
-    protected function index()
+    public function index()
     {
         $posts = Post::latest()->get();
+
+        $likedIds = LikedPost::query()->where('user_id', auth()->id())
+            ->get('post_id')->pluck('post_id')->toArray();
+
+        foreach ($posts as $post) {
+            $post['is_liked'] = in_array($post->id, $likedIds);
+        }
 
         return PostResource::collection($posts);
     }
 
-
-    protected function store(StoreRequest $request)
+    public function store(StoreRequest $request)
     {
         $data = $request->validated();
 
@@ -52,5 +59,12 @@ class PostController extends Controller
         }
 
         return new PostResource($post);
+    }
+
+    public function toggleLike(Post $post)
+    {
+        $res = $post->likes()->toggle(auth()->id());
+
+        return ['is_liked' => count($res['attached']) > 0];
     }
 }

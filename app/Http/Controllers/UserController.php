@@ -31,6 +31,10 @@ class UserController extends Controller
     {
         $posts = $user->posts()->get();
 
+        foreach ($posts as $post) {
+            $post['is_liked'] = in_array(auth()->id(), $post->likes->pluck('id')->toArray());
+        }
+
         return PostResource::collection($posts);
     }
 
@@ -45,10 +49,11 @@ class UserController extends Controller
     {
         $followingIds = auth()->user()->followings()->latest()->get()->pluck('id')->toArray();
 
-        // return $followingIds;
+        $likedByAuthUserIds = auth()->user()->likedPosts()->get()->pluck('id')->toArray();
 
         $posts = Post::query()
             ->whereIn('user_id', $followingIds)
+            ->whereNotIn('id', $likedByAuthUserIds)
             ->get();
 
         return PostResource::collection($posts);
