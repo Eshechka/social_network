@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Post\RepostRequest;
 use App\Http\Requests\Post\StoreRequest;
 use App\Http\Resources\Post\PostResource;
 use App\Models\LikedPost;
@@ -66,5 +67,29 @@ class PostController extends Controller
         $res = $post->likes()->toggle(auth()->id());
 
         return ['is_liked' => count($res['attached']) > 0];
+    }
+
+    public function repost(RepostRequest $request, Post $post)
+    {
+        $data = $request->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $data['user_id'] = auth()->id();
+            $data['reposted_id'] = $post->id;
+            $data['image_id'] = $post->image_id;
+
+            $post = Post::create($data);
+
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            return response()->json([
+                'error' => $exception->getMessage(),
+            ]);
+        }
+
+        return new PostResource($post);
     }
 }
