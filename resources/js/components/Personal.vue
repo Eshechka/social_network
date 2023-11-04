@@ -1,5 +1,7 @@
 <template>
     <div class="w-96 mx-auto">
+        <Stat :stats="stats"></Stat>
+
         <div class="mb-4">
             <div class=" mb-3">
                 <input v-model="title" class="w-96 rounded-3xl border p-2 border-slate-300" type="text"
@@ -45,10 +47,11 @@
 <script>
 import axios from "axios";
 import Post from "./Post.vue";
+import Stat from "./Stat.vue";
 
 export default {
     name: "Personal",
-    components: {Post},
+    components: {Stat, Post},
 
     data() {
         return {
@@ -58,12 +61,14 @@ export default {
             image: '',
             posts: [],
             errors: [],
+            stats: {},
         }
     },
 
     mounted() {
         this.getAuth();
         this.getPosts();
+        this.getStats();
     },
 
     methods: {
@@ -71,6 +76,12 @@ export default {
             axios.get('/api/personal').then(response => {
                 console.log('getAuth response = ', response)
             });
+        },
+        getStats() {
+            axios.post(`/api/users/stats/`, {user_id: null})
+                .then(response => {
+                    this.stats = response.data.data;
+                });
         },
         getPosts() {
             axios.get('/api/posts').then(response => {

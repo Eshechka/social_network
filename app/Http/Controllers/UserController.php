@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\StatRequest;
 use App\Http\Resources\Post\PostResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Post;
@@ -25,6 +26,25 @@ class UserController extends Controller
         }
 
         return UserResource::collection($users);
+    }
+
+    public function stats(StatRequest $request)
+    {
+        $data = $request->validated();
+        $user = $data['user_id'] ? User::find($data['user_id']) : auth()->user();
+
+        $posts = $user->posts;
+
+        $stats['likes_count'] = 0;
+        foreach ($posts as $post) {
+            $stats['likes_count'] = $stats['likes_count'] + $post->likes()->count();
+        }
+
+        $stats['posts_count'] = $user->posts()->count();
+        $stats['followings_count'] = $user->followings()->count();
+        $stats['subscribers_count'] = $user->subscribers()->count();
+
+        return response()->json(['data' => $stats]);
     }
 
     public function posts(User $user)
