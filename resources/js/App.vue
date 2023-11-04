@@ -25,11 +25,11 @@ export default {
     mounted() {
         this.getToken();
     },
-    watch: {
-       $route(to, from) {
-            this.getToken();
-        }
-    },
+    // watch: {
+    //    $route(to, from) {
+    //         this.getToken();
+    //     }
+    // },
 
     methods: {
         getToken() {

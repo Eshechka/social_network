@@ -19,7 +19,6 @@
 
         <div class="flex justify-between mt-2 items-center">
             <div class="flex">
-
                 <div class="flex">
                     <svg @click.prevent="toggleLike(post)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                          stroke-width="1.5"
@@ -34,7 +33,13 @@
                     <p>{{ post.likes_count }}</p>
                 </div>
                 <div class="flex">
-                    <svg @click.prevent="openRepost()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                    <svg v-if="post.is_auth_user_post" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         stroke-width="1.5" stroke="currentColor"
+                         :class="['mx-2 stroke-sky-500 w-6 h-6 fill-white']">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
+                    </svg>
+                    <svg v-if="!post.is_auth_user_post" @click.prevent="openRepost()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                          stroke-width="1.5" stroke="currentColor"
                          :class="['mx-2 stroke-sky-500 cursor-pointer hover:fill-sky-500 w-6 h-6 fill-white']">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -61,29 +66,36 @@
             </div>
         </div>
 
-<!--        <div v-if="post.comments_count > 0" class="mt-4">
+        <div v-if="(post.comments_count > 0 && !comments) || (comments && comments.length > 0)" class="mt-4">
 
-            <p class="cursor-pointer" v-if="!isShowed" @click="getComments(post)">Show {{ post.comments_count }} comments</p>
+            <p class="cursor-pointer" v-if="!isShowed" @click="getComments(post)">Show {{ comments ? comments.length : post.comments_count }} comments</p>
             <p class="cursor-pointer" v-if="isShowed" @click="isShowed = false">Close</p>
 
             <div v-if="comments && isShowed">
-                <div v-for="comment in comments" class="mt-4 pt-4 border-t border-gray-300">
-
+                <div v-for="comment in comments"
+                     :class="['mt-4 pt-4 border-t border-gray-300', comment.parent_id ? 'ml-4' : 'ml-0']"
+                >
                     <div class="flex mb-2">
                         <p class="text-sm mr-2">{{ comment.user.name }}</p>
-                        <p @click="setParentId(comment)" class="text-sm text-sky-500 cursor-pointer">Answer</p>
+                        <p v-if="!comment.parent_id" @click="setParentId(comment)" class="text-sm text-sky-500 cursor-pointer">Answer</p>
                     </div>
-                    <p><span v-if="comment.answered_for_user" class="text-sky-400">{{ comment.answered_for_user}},</span> {{ comment.body }}</p>
+                    <p>
+
+                        <span v-if="comment.parent_id"
+                            class="text-sky-400">
+                            {{ comment.parent_comment.user.name }},
+                        </span> {{ comment.body }}
+                    </p>
                     <p class="mt-2 text-right text-sm">{{ comment.date }}</p>
                 </div>
             </div>
-        </div>-->
+        </div>
 
-<!--        <div class="mt-4">
+        <div class="mt-4">
             <div class=" mb-3">
                 <div class="flex items-center">
-                <p v-if="comment" class="mr-2">Answered for {{ comment.user.name }}</p>
-                <p v-if="comment" @click="comment = null" class="cursor-pointer text-sky-400 text-sm">Cancel</p>
+                <p v-if="answeredComment" class="mr-2">Answered for {{ answeredComment.user.name }}</p>
+                <p v-if="answeredComment" @click="cancelParentId()" class="cursor-pointer text-sky-400 text-sm">Cancel</p>
                 </div>
                 <input v-model="body" class="w-96 rounded-3xl border p-2 border-slate-300" type="text"
                        placeholder="Your comment here...">
@@ -92,7 +104,7 @@
                 <a @click.prevent="storeComment(post)" href="#" class="block p-2 w-32 text-center rounded-3xl bg-green-600 text-white
                 hover:bg-white hover:border hover:border-green-600 hover:text-green-600 box-border ml-auto">Comment</a>
             </div>
-        </div>-->
+        </div>
     </div>
 </template>
 
@@ -113,9 +125,9 @@ export default {
             body: '',
             is_repost: false,
             repostedId: null,
-            comments: [],
             isShowed: false,
-            comment: null,
+            comments: null,
+            answeredComment: null,
         }
     },
 
@@ -133,13 +145,39 @@ export default {
             this.is_repost = true;
         },
         repost(post) {
-            console.log('POST', post);
             axios.post(`/api/posts/${post.id}/repost`, {title: this.title, content: this.content})
                 .then(r => {
                     this.title = '';
                     this.content = '';
                     this.is_repost = false;
                 })
+        },
+        storeComment(post) {
+            axios.post(`/api/posts/${post.id}/comment`, {body: this.body, parent_id: this.answeredComment ? this.answeredComment.id : null})
+                .then(r => {
+                    this.body = '';
+                    this.comments = [...this.comments, r.data.data];
+                })
+        },
+        getComments(post) {
+            if (this.comments === null) {
+                axios.get(`/api/posts/${post.id}/comments`)
+                    .then(r => {
+                        const comments = r.data.data;
+                        if (comments && comments.length > 0) {
+                            this.comments = r.data.data;
+                            this.isShowed = true;
+                        }
+                    })
+            } else {
+                this.isShowed = true;
+            }
+        },
+        setParentId(comment) {
+            this.answeredComment = comment;
+        },
+        cancelParentId() {
+            this.answeredComment = null;
         },
     },
 
