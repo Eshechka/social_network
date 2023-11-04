@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Comment\StoreCommentRequest;
 use App\Http\Requests\Post\RepostRequest;
-use App\Http\Requests\Post\StoreRequest;
+use App\Http\Requests\Post\StorePostRequest;
+use App\Http\Resources\Comment\CommentResource;
 use App\Http\Resources\Post\PostResource;
+use App\Models\Comment;
 use App\Models\LikedPost;
 use App\Models\Post;
 use App\Models\PostImage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 
@@ -27,7 +31,7 @@ class PostController extends Controller
         return PostResource::collection($posts);
     }
 
-    public function store(StoreRequest $request)
+    public function store(StorePostRequest $request)
     {
         $data = $request->validated();
 
@@ -54,9 +58,7 @@ class PostController extends Controller
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
-            return response()->json([
-                'error' => $exception->getMessage(),
-            ]);
+            return response()->json(['error' => $exception->getMessage()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return new PostResource($post);
@@ -91,5 +93,35 @@ class PostController extends Controller
         }
 
         return new PostResource($post);
+    }
+
+    public function comment(StoreCommentRequest $request, Post $post)
+    {
+        $data = $request->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $data['user_id'] = auth()->id();
+            $data['post_id'] = $post->id;
+
+            $comment = Comment::create($data);
+
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            return response()->json([
+                'error' => $exception->getMessage(),
+            ]);
+        }
+
+        return new CommentResource($comment);
+    }
+
+    public function comments(Post $post)
+    {
+        $comments = $post->comments;
+
+        return CommentResource::collection($comments);
     }
 }

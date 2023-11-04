@@ -21,6 +21,9 @@ window.axios.interceptors.response.use({}, err => {
             router.push({path: "/login"});
         }
     }
+    if ( err.response.status === 422 ) {
+        return Promise.reject(err);
+    }
 });
 
 /**

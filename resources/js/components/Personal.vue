@@ -4,16 +4,16 @@
             <div class=" mb-3">
                 <input v-model="title" class="w-96 rounded-3xl border p-2 border-slate-300" type="text"
                        placeholder="title">
-<!--                <div v-if="errors.title">-->
-<!--                    <p v-for="error in errors.title" class="text-sm mt-2 text-red-500">{{ error }}</p>-->
-<!--                </div>-->
+                <div v-if="errors.title">
+                    <p v-for="error in errors.title" class="text-sm mt-2 text-red-500">{{ error }}</p>
+                </div>
             </div>
             <div class=" mb-3">
                 <textarea v-model="content" class="w-96 rounded-3xl border p-2 border-slate-300"
                           placeholder="content"></textarea>
-<!--                <div v-if="errors.content">-->
-<!--                    <p v-for="error in errors.content" class="text-sm mb-2 text-red-500">{{ error }}</p>-->
-<!--                </div>-->
+                <div v-if="errors.content">
+                    <p v-for="error in errors.content" class="text-sm mb-2 text-red-500">{{ error }}</p>
+                </div>
             </div>
             <div class="flex mb-3 items-center">
                 <div>
@@ -49,6 +49,7 @@ import Post from "./Post.vue";
 export default {
     name: "Personal",
     components: {Post},
+
     data() {
         return {
             title: '',
@@ -56,6 +57,7 @@ export default {
             fileInput: '',
             image: '',
             posts: [],
+            errors: [],
         }
     },
 
@@ -67,7 +69,7 @@ export default {
     methods: {
         getAuth() {
             axios.get('/api/personal').then(response => {
-                console.log('response = ', response)
+                console.log('getAuth response = ', response)
             });
         },
         getPosts() {
@@ -101,7 +103,11 @@ export default {
                     this.content = '';
                     this.image = null;
                     this.posts.unshift({...res.data.data});
-                });
+                })
+                .catch(err => {
+                    this.errors = err.response.data.errors;
+                })
+            ;
         },
     },
 }
